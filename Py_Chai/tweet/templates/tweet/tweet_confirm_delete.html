@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}Tweetee{% endblock %}
+{% block content %}
+    <h1 class="text-center mt-4">
+        Are you sure you want to delete this tweet?
+    </h1>
+    <form method="post" class="form">
+        {% csrf_token %}
+        <button class="btn btn-danger">
+            Delete
+        </button>
+        <button class="btn btn-secondary" type="submit">
+            Cancel
+        </button>
+    </form>
+{% endblock %}
+4

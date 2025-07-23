@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}List - Tweetee{% endblock %}
+{% block content %}
+    <h1 class="text-center mt-4">
+        Home
+    </h1>
+    <a href="{%url 'tweet:tweet_create' %}" class="btn btn-primary mb-3">
+        Create a tweet
+    </a>
+    <div class="container row">
+        {% for tweet in tweets  %}
+            <div class="card" style="width: 18rem;">
+                <img src="{{tweet.photo.url}}" class="card-img-top" alt="...">
+                <div class="card-body">
+                    <h5 class="card-title">{{tweet.user.username}}</h5>
+                    <p class="card-text">{{tweet.text}}</p>
+                    <a href="{%url 'tweet:tweet_edit' tweet.id %}" class="btn btn-primary">Edit</a>
+                    <a href="{%url 'tweet:tweet_delete' tweet.id %}" class="btn btn-danger">Delete</a>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% endblock %}

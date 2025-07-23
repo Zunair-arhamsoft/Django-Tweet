@@ -4,8 +4,6 @@ from .forms import TweetForm
 from django.shortcuts import get_object_or_404, redirect
 from django.contrib import messages
 
-def index(request):
-    return render(request, 'tweet/index.html')
 
 def tweet_list(req):
     tweets = Tweet.objects.all().order_by('-created_at')
