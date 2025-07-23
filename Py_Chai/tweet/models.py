@@ -6,7 +6,7 @@ class Tweet(models.Model):
     text = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    photos = models.ImageField(upload_to='tweets/', blank=True, null=True)
+    photo = models.ImageField(upload_to='tweets/', blank=True, null=True)
     likes = models.ManyToManyField(User, related_name='liked_tweets', blank=True)
 
     def __str__(self):
