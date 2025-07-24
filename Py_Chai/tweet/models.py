@@ -1,3 +1,4 @@
+
 from django.db import models
 from django.contrib.auth.models import User
 
@@ -7,7 +8,9 @@ class Tweet(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     photo = models.ImageField(upload_to='tweets/', blank=True, null=True)
-    likes = models.ManyToManyField(User, related_name='liked_tweets', blank=True)
+
+    def like_count(self):
+        return self.likes.count()
 
     def __str__(self):
         return f"{self.user.username}: {self.text[:20]}..."

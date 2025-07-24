@@ -1,23 +1,59 @@
-{% extends "base.html" %}
-{% block title %}List - Tweetee{% endblock %}
+{% extends "base.html" %} {% block title %}Home - Tweetee{% endblock %} 
 {% block content %}
-    <h1 class="text-center mt-4">
-        Home
-    </h1>
-    <a href="{%url 'tweet:tweet_create' %}" class="btn btn-primary mb-3">
-        Create a tweet
+<div class="container py-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 m-0">Tweets</h1>
+    <a
+      href="{% url 'tweet:tweet_create' %}"
+      class="btn btn-sm btn-outline-primary"
+    >
+      + Create Tweet
     </a>
-    <div class="container row">
-        {% for tweet in tweets  %}
-            <div class="card" style="width: 18rem;">
-                <img src="{{tweet.photo.url}}" class="card-img-top" alt="...">
-                <div class="card-body">
-                    <h5 class="card-title">{{tweet.user.username}}</h5>
-                    <p class="card-text">{{tweet.text}}</p>
-                    <a href="{%url 'tweet:tweet_edit' tweet.id %}" class="btn btn-primary">Edit</a>
-                    <a href="{%url 'tweet:tweet_delete' tweet.id %}" class="btn btn-danger">Delete</a>
-                </div>
-            </div>
-        {% endfor %}
+  </div>
+
+  <div class="row g-4">
+    {% for tweet in tweets %}
+    <div class="col-md-4 col-sm-6">
+      <div class="card shadow-sm h-100">
+        {% if tweet.photo %}
+        <img
+          src="{{ tweet.photo.url }}"
+          class="card-img-top"
+          alt="Tweet Image"
+          style="object-fit: cover; height: 200px"
+        />
+        {% endif %}
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <h5 class="card-title text-primary mb-0">
+              @{{ tweet.user.username }}
+            </h5>
+            <small class="text-muted"
+              >{{ tweet.created_at|date:"M d, Y H:i" }}</small
+            >
+          </div>
+          <p class="card-text text-muted">{{ tweet.text }}</p>
+
+          {% if tweet.user == user %}
+          <div class="d-flex justify-content-between mt-3">
+            <a
+              href="{% url 'tweet:tweet_edit' tweet.id %}"
+              class="btn btn-sm btn-outline-primary"
+              >Edit</a
+            >
+            <a
+              href="{% url 'tweet:tweet_delete' tweet.id %}"
+              class="btn btn-sm btn-outline-danger"
+              >Delete</a
+            >
+          </div>
+          {% endif %}
+        </div>
+      </div>
     </div>
+    {% empty %}
+    <p class="text-muted">No tweets to show.</p>
+    {% endfor %}
+  </div>
+</div>
 {% endblock %}
