@@ -1,14 +1,26 @@
-from .models import Tweet
+from .models import Tweet, Like 
 from django.shortcuts import redirect, get_object_or_404, get_object_or_404, redirect, render
 from .models import Tweet
 from .forms import TweetForm, UserRegistrationForm
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login
+from django.http import HttpResponseRedirect
+from django.urls import reverse
 
 def tweet_list(req):
     tweets = Tweet.objects.all().order_by('-created_at')
-    return render(req, 'tweet/tweet_list.html', {'tweets': tweets})
+    tweet_data = []
+    for tweet in tweets:
+        liked = tweet.likes.filter(user=req.user).exists(
+        ) if req.user.is_authenticated else False
+        tweet_data.append({
+            'tweet': tweet,
+            'liked': liked,
+            'like_count': tweet.likes.count()
+        })
+        
+    return render(req, 'tweet/tweet_list.html', {'tweet_data': tweet_data})
 
 @login_required
 def tweet_create(req):
@@ -59,3 +71,11 @@ def register(req):
     else:
         form = UserRegistrationForm()
     return render(req, 'registration/register.html', {'form': form})
+
+@login_required
+def toggle_like(req, tweet_id):
+    tweet = get_object_or_404(Tweet, id=tweet_id)
+    like, created = Like.objects.get_or_create(user=req.user, tweet=tweet)
+    if not created:
+        like.delete()
+    return HttpResponseRedirect(reverse('tweet:tweet_list'))
