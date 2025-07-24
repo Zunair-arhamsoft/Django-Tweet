@@ -33,16 +33,20 @@
                         <form method="post" action="{% url 'tweet:tweet_like' tweet.id %}">
                             {% csrf_token %}
                             <button type="submit" class="btn btn-sm w-100 mb-2 {% if liked %}btn-danger{% else %}btn-outline-danger{% endif %}">
-                            ❤️ {{ like_count }}
+                                ❤️ {{ like_count }}
                             </button>
                         </form>
 
-                        {% if tweet.user == request.user %}
-                            <div class="d-flex gap-2">
+                        <div class="d-flex gap-2">
+                            {% if tweet.user == request.user %}
                                 <a href="{% url 'tweet:tweet_edit' tweet.id %}" class="btn btn-sm btn-outline-primary w-50">Edit</a>
                                 <a href="{% url 'tweet:tweet_delete' tweet.id %}" class="btn btn-sm btn-outline-danger w-50">Delete</a>
-                            </div>
-                        {% endif %}
+                            {% else %}
+                                <!-- Placeholder buttons to reserve space -->
+                                <button class="btn btn-sm w-50 invisible">Edit</button>
+                                <button class="btn btn-sm w-50 invisible">Delete</button>
+                            {% endif %}
+                        </div>
                     </div>
                 </div>
             </div>
@@ -50,5 +54,36 @@
         {% endwith %}
     {% endfor %}
     </div>
+    {% if page_obj.has_other_pages %}
+        <nav class="mt-4 d-flex justify-content-center">
+            <ul class="pagination">
+                {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page=1">&laquo;</a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}">&lt;</a>
+                </li>
+                {% else %}
+                <li class="page-item disabled"><span class="page-link">&laquo;</span></li>
+                <li class="page-item disabled"><span class="page-link">&lt;</span></li>
+                {% endif %}
+
+                <li class="page-item active"><span class="page-link">{{ page_obj.number }}</span></li>
+
+                {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.next_page_number }}">&gt;</a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">&raquo;</a>
+                </li>
+                {% else %}
+                <li class="page-item disabled"><span class="page-link">&gt;</span></li>
+                <li class="page-item disabled"><span class="page-link">&raquo;</span></li>
+                {% endif %}
+            </ul>
+        </nav>
+    {% endif %}
 </div>
 {% endblock %}

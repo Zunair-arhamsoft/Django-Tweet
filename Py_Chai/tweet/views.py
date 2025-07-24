@@ -7,11 +7,16 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login
 from django.http import HttpResponseRedirect
 from django.urls import reverse
+from django.core.paginator import Paginator
 
 def tweet_list(req):
     tweets = Tweet.objects.all().order_by('-created_at')
+    paginator = Paginator(tweets, 2) 
+    page_number = req.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
     tweet_data = []
-    for tweet in tweets:
+    for tweet in page_obj:
         liked = tweet.likes.filter(user=req.user).exists(
         ) if req.user.is_authenticated else False
         tweet_data.append({
@@ -20,7 +25,7 @@ def tweet_list(req):
             'like_count': tweet.likes.count()
         })
         
-    return render(req, 'tweet/tweet_list.html', {'tweet_data': tweet_data})
+    return render(req, 'tweet/tweet_list.html', {'tweet_data': tweet_data,  'page_obj': page_obj})
 
 @login_required
 def tweet_create(req):
