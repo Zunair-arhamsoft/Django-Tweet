@@ -30,12 +30,12 @@
                     {% endif %}
 
                     <div class="mt-auto">
-                        <form method="post" action="{% url 'tweet:tweet_like' tweet.id %}">
-                            {% csrf_token %}
-                            <button type="submit" class="btn btn-sm w-100 mb-2 {% if liked %}btn-danger{% else %}btn-outline-danger{% endif %}">
-                                ❤️ {{ like_count }}
+                        <div class="like-section" data-tweet-id="{{ tweet.id }}">
+                            <button type="button" class="btn btn-sm w-100 mb-2 like-btn {% if liked %}btn-danger{% else %}btn-outline-danger{% endif %}">
+                                ❤️ <span class="like-count">{{ like_count }}</span>
                             </button>
-                        </form>
+                        </div>
+
 
                         <div class="d-flex gap-2">
                             {% if tweet.user == request.user %}
@@ -86,4 +86,61 @@
         </nav>
     {% endif %}
 </div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    document.querySelectorAll(".like-btn").forEach(button => {
+      button.addEventListener("click", function () {
+        const parent = button.closest(".like-section");
+        const tweetId = parent.dataset.tweetId;
+        const likeCountSpan = parent.querySelector(".like-count");
+
+        fetch(`/tweet/${tweetId}/like/`, {
+          method: "POST",
+          headers: {
+            "X-CSRFToken": getCookie("csrftoken"),
+            "X-Requested-With": "XMLHttpRequest"
+          }
+        })
+        .then(response => {
+          if (response.status === 403 || response.redirected) {
+            window.location.href = "/accounts/login/?next=" + window.location.pathname;
+            return null;
+          }
+
+          const contentType = response.headers.get("content-type");
+          if (contentType && contentType.includes("application/json")) {
+            return response.json();
+          } else {
+            throw new Error("Expected JSON, got something else");
+          }
+        })
+        .then(data => {
+          if (!data) return;
+
+          likeCountSpan.textContent = data.like_count;
+          button.classList.toggle("btn-danger", data.liked);
+          button.classList.toggle("btn-outline-danger", !data.liked);
+        })
+        .catch(error => console.error("Error:", error));
+      });
+    });
+
+    function getCookie(name) {
+      let cookieValue = null;
+      if (document.cookie && document.cookie !== "") {
+        const cookies = document.cookie.split(";");
+        for (let i = 0; i < cookies.length; i++) {
+          const cookie = cookies[i].trim();
+          if (cookie.substring(0, name.length + 1) === (name + "=")) {
+            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+            break;
+          }
+        }
+      }
+      return cookieValue;
+    }
+  });
+</script>
+
 {% endblock %}

@@ -1,3 +1,4 @@
+from django.http import JsonResponse
 from .models import Tweet, Like 
 from django.shortcuts import redirect, get_object_or_404, get_object_or_404, redirect, render
 from .models import Tweet
@@ -77,10 +78,22 @@ def register(req):
         form = UserRegistrationForm()
     return render(req, 'registration/register.html', {'form': form})
 
+
 @login_required
 def toggle_like(req, tweet_id):
     tweet = get_object_or_404(Tweet, id=tweet_id)
     like, created = Like.objects.get_or_create(user=req.user, tweet=tweet)
+
     if not created:
         like.delete()
+        liked = False
+    else:
+        liked = True
+
+    if req.headers.get('x-requested-with') == 'XMLHttpRequest':
+        return JsonResponse({
+            'liked': liked,
+            'like_count': tweet.likes.count()
+        })
+
     return HttpResponseRedirect(reverse('tweet:tweet_list'))
