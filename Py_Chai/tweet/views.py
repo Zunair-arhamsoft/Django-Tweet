@@ -1,32 +1,55 @@
-from django.http import JsonResponse
 from .models import Tweet, Like 
 from django.shortcuts import redirect, get_object_or_404, get_object_or_404, redirect, render
-from .models import Tweet
 from .forms import TweetForm, UserRegistrationForm
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, JsonResponse
 from django.urls import reverse
-from django.core.paginator import Paginator
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
-def tweet_list(req):
+def tweet_list(request):
     tweets = Tweet.objects.all().order_by('-created_at')
-    paginator = Paginator(tweets, 2) 
-    page_number = req.GET.get('page')
-    page_obj = paginator.get_page(page_number)
+    paginator = Paginator(tweets, 6)
+    page_number = request.GET.get('page', 1)
+
+    try:
+        page_obj = paginator.page(page_number)
+    except PageNotAnInteger:
+        page_obj = paginator.page(1)
+    except EmptyPage:
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            return JsonResponse({
+                'tweets': [],
+                'has_next': False,
+            })
+        page_obj = paginator.page(paginator.num_pages)
 
     tweet_data = []
     for tweet in page_obj:
-        liked = tweet.likes.filter(user=req.user).exists(
-        ) if req.user.is_authenticated else False
+        liked = tweet.likes.filter(user=request.user).exists(
+        ) if request.user.is_authenticated else False
         tweet_data.append({
-            'tweet': tweet,
+            'id': tweet.id,
+            'user': tweet.user.username,
+            'text': tweet.text,
+            'created_at': tweet.created_at.strftime("%b %d, %Y %H:%M"),
+            'photo_url': tweet.photo.url if tweet.photo else None,
             'liked': liked,
-            'like_count': tweet.likes.count()
+            'like_count': tweet.likes.count(),
+            'is_owner': request.user == tweet.user
         })
-        
-    return render(req, 'tweet/tweet_list.html', {'tweet_data': tweet_data,  'page_obj': page_obj})
+
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        return JsonResponse({
+            'tweets': tweet_data,
+            'has_next': page_obj.has_next(),
+        })
+
+    return render(request, 'tweet/tweet_list.html', {
+        'tweet_data': tweet_data,
+        'page_obj': page_obj,
+    })
 
 @login_required
 def tweet_create(req):
