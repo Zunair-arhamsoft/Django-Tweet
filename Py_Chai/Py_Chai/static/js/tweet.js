@@ -59,40 +59,60 @@ function renderTweetCard(tweet) {
     return `
     <div class="col-md-6 col-lg-4 d-flex tweet-card">
         <div class="card shadow-sm border-0 flex-fill d-flex flex-column">
-        <div class="card-body d-flex flex-column">
-            <div class="d-flex justify-content-between align-items-center mb-2">
-            <h6 class="mb-0 fw-bold text-primary">@${tweet.user}</h6>
-            <small class="text-muted">${tweet.created_at}</small>
-            </div>
+            <div class="card-body d-flex flex-column">
+                
+                <!-- Header -->
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <div class="d-flex align-items-center gap-2">
+                        <a href="/user/${tweet.user}/" class="text-decoration-none d-flex align-items-center gap-2">
+                            <img src="${tweet.avatar_url}" alt="avatar" class="rounded-circle border" style="width: 36px; height: 36px; object-fit: cover;">
+                            <h6 class="mb-1 fw-semibold text-primary mb-0">@${tweet.user}</h6>
+                        </a>
+                    </div>
+                    <small class="text-muted">${tweet.created_at}</small>
+                </div>
 
-            <p class="mb-2 text-truncate-3">${tweet.text}</p>
+                <!-- Tweet Text -->
+                <p class="mb-2 text-truncate-3" style="white-space: pre-wrap;">${tweet.text}</p>
 
-            ${tweet.photo_url ? `
-            <div class="mb-2">
-            <img src="${tweet.photo_url}" class="img-fluid rounded" style="max-height: 180px; object-fit: cover; width: 100%;" />
-            </div>` : ''}
+                <!-- Optional Image -->
+                ${tweet.photo_url ? `
+                    <div class="mb-2">
+                        <img src="${tweet.photo_url}" class="img-fluid rounded" style="max-height: 180px; object-fit: cover; width: 100%;" />
+                    </div>
+                ` : ''}
 
-            <div class="mt-auto">
-            <div class="like-section" data-tweet-id="${tweet.id}">
-                <button type="button" class="btn btn-sm w-100 mb-2 like-btn ${tweet.liked ? 'btn-danger' : 'btn-outline-danger'}">
-                ❤️ <span class="like-count">${tweet.like_count}</span>
-                </button>
-            </div>
+                <!-- Footer: Likes + Edit/Delete -->
+                <div class="d-flex mt-auto">
+                    <div class="like-section w-33 flex-fill text-end pe-1" data-tweet-id="${tweet.id}">
+                        <button type="button" class="btn btn-sm like-btn w-100 ${tweet.liked ? 'btn-danger' : 'btn-outline-danger'}">
+                            ❤️ <span class="like-count">${tweet.like_count}</span>
+                        </button>
+                    </div>
 
-            <div class="d-flex gap-2">
-                ${tweet.is_owner ? `
-                <a href="/tweet/${tweet.id}/edit/" class="btn btn-sm btn-outline-primary w-50">Edit</a>
-                <a href="/tweet/${tweet.id}/delete/" class="btn btn-sm btn-outline-danger w-50">Delete</a>
-                ` : `
-                <button class="btn btn-sm w-50 invisible">Edit</button>
-                <button class="btn btn-sm w-50 invisible">Delete</button>
-                `}
-            </div>
+                    ${tweet.is_owner ? `
+                        <div class="w-33 flex-fill px-1">
+                            <a href="/tweet/${tweet.id}/edit/" class="btn btn-sm btn-outline-primary w-100">Edit</a>
+                        </div>
+                        <div class="w-33 flex-fill ps-1">
+                            <a href="/tweet/${tweet.id}/delete/" class="btn btn-sm btn-outline-danger w-100">Delete</a>
+                        </div>
+                    ` : `
+                        <div class="w-33 flex-fill px-1">
+                            <button class="btn btn-sm w-100 invisible">Edit</button>
+                        </div>
+                        <div class="w-33 flex-fill ps-1">
+                            <button class="btn btn-sm w-100 invisible">Delete</button>
+                        </div>
+                    `}
+                </div>
             </div>
         </div>
-        </div>
-    </div>`;
+    </div>
+    `;
 }
+
+
 
 // Function to attach like button event listeners
 function attachLikeListeners() {
