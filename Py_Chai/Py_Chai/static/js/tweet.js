@@ -92,10 +92,10 @@ function renderTweetCard(tweet) {
 
                     ${tweet.is_owner ? `
                         <div class="w-33 flex-fill px-1">
-                            <a href="/tweet/${tweet.id}/edit/" class="btn btn-sm btn-outline-primary w-100">Edit</a>
+                            <a href="/edit/${tweet.id}/" class="btn btn-sm btn-outline-primary w-100">Edit</a>
                         </div>
                         <div class="w-33 flex-fill ps-1">
-                            <a href="/tweet/${tweet.id}/delete/" class="btn btn-sm btn-outline-danger w-100">Delete</a>
+                            <a href="/delete/${tweet.id}/" class="btn btn-sm btn-outline-danger w-100">Delete</a>
                         </div>
                     ` : `
                         <div class="w-33 flex-fill px-1">

@@ -6,55 +6,20 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login
 from django.http import HttpResponseRedirect, JsonResponse
 from django.urls import reverse
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from utils.tweets import get_paginated_tweet_data
 
 def tweet_list(request):
     tweets = Tweet.objects.all().order_by('-created_at')
-    paginator = Paginator(tweets, 6)
-    page_number = request.GET.get('page', 1)
+    result = get_paginated_tweet_data(request, tweets)
 
-    try:
-        page_obj = paginator.page(page_number)
-    except PageNotAnInteger:
-        page_obj = paginator.page(1)
-    except EmptyPage:
-        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
-            return JsonResponse({
-                'tweets': [],
-                'has_next': False,
-            })
-        page_obj = paginator.page(paginator.num_pages)
-
-    tweet_data = []
-    for tweet in page_obj:
-        liked = tweet.likes.filter(user=request.user).exists(
-        ) if request.user.is_authenticated else False
-        avatar_url = (
-            tweet.user.profile.avatar.url if hasattr(tweet.user, 'profile') and tweet.user.profile.avatar
-            else '/static/images/profile-user.png')
-
-        tweet_data.append({
-            'id': tweet.id,
-            'user': tweet.user.username,
-            'avatar_url': avatar_url,
-            'text': tweet.text,
-            'created_at': tweet.created_at.strftime("%b %d, %Y %H:%M"),
-            'photo_url': tweet.photo.url if tweet.photo else None,
-            'liked': liked,
-            'like_count': tweet.likes.count(),
-            'is_owner': request.user == tweet.user
-        })
-
-    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
-        return JsonResponse({
-            'tweets': tweet_data,
-            'has_next': page_obj.has_next(),
-        })
+    if result['json']:
+        return result['json']
 
     return render(request, 'tweet/tweet_list.html', {
-        'tweet_data': tweet_data,
-        'page_obj': page_obj,
+        'tweet_data': result['tweet_data'],
+        'page_obj': result['page_obj'],
     })
+
 
 @login_required
 def tweet_create(req):
